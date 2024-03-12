@@ -16,3 +16,6 @@ Upon insertion of zoomed BMP images into MySQL, the first container notifies the
 * C04, C05: Apache TomEE 9 w RMI Server objects
 * C01: Notification that the pic is ready => in the front-end with link for download from node.js C06
 * C06: REST API in node.js for DB access
+
+
+![diagrama_arhitectura_solutie](https://github.com/daria-cirjau/ImageUpload_DADC_Project/assets/81715374/18b736eb-3d2d-4caa-9b78-1393886a5954)
