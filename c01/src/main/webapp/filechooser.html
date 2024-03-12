@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Image Uploader</title>
+</head>
+<body>
+<input type="file" class="file-upload" id="fileInput" onchange="showImage(event)">
+<br>
+<img id="image-preview" src="no_file_loaded.png" width="400" height="400">
+<br>
+<button onclick="increaseSize()">+</button>
+<button onclick="decreaseSize()">-</button>
+<label>
+    <input type="text" id="percent" value="100">
+    %
+</label>
+<br>
+<button onclick="uploadImage()">Upload Image</button>
+<br>
+<a id="downloadLink" href="#" style="display:block; margin-top: 20px;">No image available yet</a>
+<script>
+    function showImage(event) {
+        const fileInput = event.target;
+        const imagePreview = document.getElementById("image-preview");
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+            };
+
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            imagePreview.src = "no_file_loaded.png";
+        }
+    }
+
+    function increaseSize() {
+        const percent = document.getElementById("percent");
+        let currentValue = parseFloat(percent.value);
+        if (!isNaN(currentValue)) {
+            percent.value = (currentValue + 10).toString();
+        }
+    }
+
+    function decreaseSize() {
+        const percent = document.getElementById("percent");
+        let currentValue = parseFloat(percent.value);
+        if (!isNaN(currentValue)) {
+            percent.value = (currentValue - 10).toString();
+        }
+    }
+
+	function uploadImage() {
+	    const fileInput = document.getElementById('fileInput');
+	    const percentInput = document.getElementById('percent');
+	    const file = fileInput.files[0];
+	    const percent = parseInt(percentInput.value);
+	
+	    if (!file) {
+	        console.error('No image file selected.');
+	        return;
+	    }
+	
+	    if (isNaN(percent)) {
+	        console.error('Percent must be an integer.');
+	        return;
+	    }
+	
+	    const formData = new FormData();
+	    formData.append('image', file);
+	    formData.append('percent', percent);
+	
+	    fetch('/c01/imageUpload/upload', {
+	        method: 'POST',
+	        body: formData
+	    })
+		.then(response => {
+		    if (response.ok) {
+		        return response.text(); 
+		    }
+		    return response.text().then(text => Promise.reject(text));
+		})
+		.then(responseText => {
+		    console.log('Upload successful:', responseText);
+		})
+	    .catch(error => {
+	        console.error('Error during image upload:', error);
+	    });
+	}
+
+
+
+
+	function checkForDownloadLink() {
+	    fetch('/c01/imageUpload/downloadLink')
+	        .then(response => {
+	            if (response.ok) {
+	                return response.text();
+	            }
+	            throw new Error('No download link available yet');
+	        })
+	        .then(link => {
+	            if (link) {
+	                document.getElementById('downloadLink').href = link;
+	                document.getElementById('downloadLink').innerText = 'Download Image';
+	            } else {
+	                throw new Error('No download link available yet');
+	            }
+	        })
+	        .catch(error => {
+	            document.getElementById('downloadLink').innerText = 'No image available yet';
+	            console.error('Error:', error);
+	        });
+	}
+
+    setInterval(checkForDownloadLink, 5000);
+</script>
+
+</body>
+</html>
